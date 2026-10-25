@@ -1,12 +1,32 @@
 plugins {
-	// 1.21.x is obfuscated, so this uses Loom's remapping plugin and Mojang's mappings.
+	// 1.20.x and 1.21.x use Mojang's mappings and need remapping.
 	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
 }
+
+def target = providers.gradleProperty('minecraft_target').getOrElse(project.minecraft_version)
+def targets = new Properties()
+file('gradle/minecraft.properties').withInputStream { targets.load(it) }
+def dependenciesForTarget = targets.getProperty(target)
+if (dependenciesForTarget == null) throw new GradleException("Unsupported Minecraft version: $target")
+def (apiVersion, menuVersion, javaVersion) = dependenciesForTarget.split(',')
+ext.minecraft_version = target
+ext.minecraft_dependency = target
+ext.minecraft_label = target
+ext.fabric_api_version = apiVersion
+ext.modmenu_version = menuVersion
+def targetJava = javaVersion.toInteger()
+def clientTests = target == '1.21.11'
 
 version = "${mod_version}+${minecraft_label}"
 group = project.maven_group
 
 repositories {
+	maven {
+		url = 'https://maven.nucleoid.xyz/'
+		content {
+			includeGroup 'eu.pb4'
+		}
+	}
 	maven {
 		name = 'Terraformers'
 		url = 'https://maven.terraformersmc.com/releases/'
@@ -28,7 +48,7 @@ loom {
 }
 
 // Client game tests only run on demand (./gradlew runClientGameTest), not as part of build.
-fabricApi {
+if (clientTests) fabricApi {
 	configureTests {
 		createSourceSet = true
 		modId = "smallhands-test"
@@ -47,11 +67,11 @@ dependencies {
 	modCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
 	modLocalRuntime "com.terraformersmc:modmenu:${project.modmenu_version}"
 	modLocalRuntime "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-	modGametestImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	if (clientTests) modGametestImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 }
 
 processResources {
-	def props = [version: project.version, minecraft_dependency: project.minecraft_dependency]
+	def props = [version: project.version, minecraft_dependency: project.minecraft_dependency, java_version: targetJava]
 	inputs.properties props
 
 	filesMatching("fabric.mod.json") {
@@ -59,18 +79,25 @@ processResources {
 	}
 }
 
+processClientResources {
+	inputs.property 'java_version', targetJava
+	filesMatching('smallhands.client.mixins.json') {
+		expand java_version: targetJava
+	}
+}
+
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = 21
+	it.options.release = targetJava
 	it.options.encoding = "UTF-8"
 }
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
+		languageVersion = JavaLanguageVersion.of(targetJava)
 	}
 
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
+	sourceCompatibility = JavaVersion.toVersion(targetJava)
+	targetCompatibility = JavaVersion.toVersion(targetJava)
 }
 
 jar {
