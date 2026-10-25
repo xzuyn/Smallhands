@@ -8,7 +8,7 @@ def targets = new Properties()
 file('gradle/minecraft.properties').withInputStream { targets.load(it) }
 def dependenciesForTarget = targets.getProperty(target)
 if (dependenciesForTarget == null) throw new GradleException("Unsupported Minecraft version: $target")
-def (apiVersion, menuVersion, javaVersion) = dependenciesForTarget.split(',')
+def (apiVersion, menuVersion, javaVersion, minimumLoader) = dependenciesForTarget.split(',')
 ext.minecraft_version = target
 ext.minecraft_dependency = target
 ext.minecraft_label = target
@@ -76,7 +76,7 @@ dependencies {
 }
 
 processResources {
-	def props = [version: project.version, minecraft_dependency: project.minecraft_dependency, java_version: targetJava,
+	def props = [version: project.version, minecraft_dependency: project.minecraft_dependency, java_version: targetJava, loader_dependency: minimumLoader,
 		modmenu_entrypoint: legacyScreen ? 'net.sallylabs.LegacySmallhandsModMenu' : 'net.sallylabs.SmallhandsModMenu']
 	inputs.properties props
 
