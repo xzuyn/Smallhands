@@ -16,8 +16,6 @@ ext.fabric_api_version = apiVersion
 ext.modmenu_version = menuVersion
 def targetJava = javaVersion.toInteger()
 def clientTests = target == '1.21.11'
-def legacyScreen = target in ['1.20', '1.20.1']
-
 version = "${mod_version}+${minecraft_label}"
 group = project.maven_group
 
@@ -48,10 +46,6 @@ loom {
 	}
 }
 
-if (legacyScreen) {
-	sourceSets.client.java.srcDir 'src/legacy/java'
-}
-
 // Client game tests only run on demand (./gradlew runClientGameTest), not as part of build.
 if (clientTests) fabricApi {
 	configureTests {
@@ -76,8 +70,7 @@ dependencies {
 }
 
 processResources {
-	def props = [version: project.version, minecraft_dependency: project.minecraft_dependency, java_version: targetJava, loader_dependency: minimumLoader,
-		modmenu_entrypoint: legacyScreen ? 'net.sallylabs.LegacySmallhandsModMenu' : 'net.sallylabs.SmallhandsModMenu']
+	def props = [version: project.version, minecraft_dependency: project.minecraft_dependency, java_version: targetJava, loader_dependency: minimumLoader]
 	inputs.properties props
 
 	filesMatching("fabric.mod.json") {

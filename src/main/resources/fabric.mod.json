@@ -20,7 +20,7 @@
 			"net.sallylabs.SmallhandsClient"
 		],
 		"modmenu": [
-			"${modmenu_entrypoint}"
+			"net.sallylabs.SmallhandsModMenu"
 		]
 	},
 	"mixins": [
