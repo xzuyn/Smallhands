@@ -3,20 +3,7 @@ plugins {
 	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
 }
 
-def target = providers.gradleProperty('minecraft_target').getOrElse(project.minecraft_version)
-def targets = new Properties()
-file('gradle/minecraft.properties').withInputStream { targets.load(it) }
-def dependenciesForTarget = targets.getProperty(target)
-if (dependenciesForTarget == null) throw new GradleException("Unsupported Minecraft version: $target")
-def (apiVersion, menuVersion, javaVersion, minimumLoader) = dependenciesForTarget.split(',')
-ext.minecraft_version = target
-ext.minecraft_dependency = target
-ext.minecraft_label = target
-ext.fabric_api_version = apiVersion
-ext.modmenu_version = menuVersion
-def targetJava = javaVersion.toInteger()
-def clientTests = target == '1.21.11'
-def legacyScreen = target in ['1.20', '1.20.1']
+def targetJava = project.java_version.toInteger()
 
 version = "${mod_version}+${minecraft_label}"
 group = project.maven_group
@@ -48,9 +35,7 @@ loom {
 	}
 }
 
-if (legacyScreen) {
-	sourceSets.client.java.srcDir 'src/legacy/java'
-}
+sourceSets.client.java.srcDir 'src/legacy/java'
 
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -63,8 +48,8 @@ dependencies {
 }
 
 processResources {
-	def props = [version: project.version, minecraft_dependency: project.minecraft_dependency, java_version: targetJava, loader_dependency: minimumLoader,
-		modmenu_entrypoint: legacyScreen ? 'net.sallylabs.LegacySmallhandsModMenu' : 'net.sallylabs.SmallhandsModMenu']
+	def props = [version: project.version, minecraft_dependency: project.minecraft_dependency, java_version: targetJava, loader_dependency: project.loader_dependency,
+		modmenu_entrypoint: 'net.sallylabs.LegacySmallhandsModMenu']
 	inputs.properties props
 
 	filesMatching("fabric.mod.json") {

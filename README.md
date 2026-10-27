@@ -10,17 +10,14 @@ https://modrinth.com/mod/small-items-mod
 Everything in this GitHub repository is a work in progress.
 
 Info:  
-This branch supports Minecraft 1.20–1.21.11. Minecraft 1.20–1.20.4 needs Java 17; later versions need Java 21.
-Newer Minecraft versions have their own branches.
+This branch builds one jar for Minecraft 1.20�1.20.1. Java 17 or later is required; Minecraft 1.20.5 and later need Java 21.
 
 ## Building
 
-Requires Java 25 to run the build. The default target uses Java 21.
+Requires Java 25 to run the build. The mod is compiled for Java 17.
 
 ```sh
 ./gradlew build
 ```
 
-The mod jar is written to `build/libs/smallhands-<version>.jar`. Run `./gradlew runClient` to start a test client with Mod Menu installed. Use `-Pminecraft_target=1.20.1` with either command to select another version.
-
-Run `./build-all.ps1` in PowerShell to build every version supported by this branch into `build/releases`. In IntelliJ, use JDK 25 for Gradle; the Java 17 and 21 toolchains are selected automatically.
+The mod jar is written to `build/libs/smallhands-<version>.jar`. Run `./gradlew runClient` to start a test client with Mod Menu installed. In IntelliJ, use JDK 25 for Gradle and the Java 17 toolchain for the mod.
