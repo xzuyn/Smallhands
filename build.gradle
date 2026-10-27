@@ -52,18 +52,6 @@ if (legacyScreen) {
 	sourceSets.client.java.srcDir 'src/legacy/java'
 }
 
-// Client game tests only run on demand (./gradlew runClientGameTest), not as part of build.
-if (clientTests) fabricApi {
-	configureTests {
-		createSourceSet = true
-		modId = "smallhands-test"
-		enableGameTests = false
-		enableClientGameTests = true
-		// Opt in only when deliberately running the client tests.
-		eula = providers.gradleProperty('acceptMinecraftEula').map { it.toBoolean() }.getOrElse(false)
-	}
-}
-
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings loom.officialMojangMappings()
@@ -72,7 +60,6 @@ dependencies {
 	modCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
 	modLocalRuntime "com.terraformersmc:modmenu:${project.modmenu_version}"
 	modLocalRuntime "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-	if (clientTests) modGametestImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 }
 
 processResources {
