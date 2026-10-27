@@ -3,19 +3,8 @@ plugins {
 	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
 }
 
-def target = providers.gradleProperty('minecraft_target').getOrElse(project.minecraft_version)
-def targets = new Properties()
-file('gradle/minecraft.properties').withInputStream { targets.load(it) }
-def dependenciesForTarget = targets.getProperty(target)
-if (dependenciesForTarget == null) throw new GradleException("Unsupported Minecraft version: $target")
-def (apiVersion, menuVersion, javaVersion, minimumLoader) = dependenciesForTarget.split(',')
-ext.minecraft_version = target
-ext.minecraft_dependency = target
-ext.minecraft_label = target
-ext.fabric_api_version = apiVersion
-ext.modmenu_version = menuVersion
-def targetJava = javaVersion.toInteger()
-def clientTests = target == '1.21.11'
+def targetJava = project.java_version.toInteger()
+
 version = "${mod_version}+${minecraft_label}"
 group = project.maven_group
 
@@ -46,18 +35,6 @@ loom {
 	}
 }
 
-// Client game tests only run on demand (./gradlew runClientGameTest), not as part of build.
-if (clientTests) fabricApi {
-	configureTests {
-		createSourceSet = true
-		modId = "smallhands-test"
-		enableGameTests = false
-		enableClientGameTests = true
-		// Opt in only when deliberately running the client tests.
-		eula = providers.gradleProperty('acceptMinecraftEula').map { it.toBoolean() }.getOrElse(false)
-	}
-}
-
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings loom.officialMojangMappings()
@@ -66,11 +43,10 @@ dependencies {
 	modCompileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
 	modLocalRuntime "com.terraformersmc:modmenu:${project.modmenu_version}"
 	modLocalRuntime "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
-	if (clientTests) modGametestImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 }
 
 processResources {
-	def props = [version: project.version, minecraft_dependency: project.minecraft_dependency, java_version: targetJava, loader_dependency: minimumLoader]
+	def props = [version: project.version, minecraft_dependency: project.minecraft_dependency, java_version: targetJava, loader_dependency: project.loader_dependency]
 	inputs.properties props
 
 	filesMatching("fabric.mod.json") {
