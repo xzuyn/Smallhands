@@ -10,7 +10,7 @@ https://modrinth.com/mod/small-items-mod
 Everything in this GitHub repository is a work in progress.
 
 Info:  
-This branch builds one jar for Minecraft 1.20.2–1.21.11. Java 17 or later is required; Minecraft 1.20.5 and later need Java 21.
+This branch builds one jar for Minecraft 1.20.2â€“1.21.11. Java 17 or later is required; Minecraft 1.20.5 and later need Java 21.
 
 ## Building
 
