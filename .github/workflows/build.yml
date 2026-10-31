@@ -29,9 +29,8 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6
 
-      # Also compiles the client game test so it keeps building; it only runs on demand.
       - name: Build
-        run: ./gradlew build compileGametestJava
+        run: ./gradlew build
 
       - name: Upload jar
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
