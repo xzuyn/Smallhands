@@ -78,6 +78,13 @@ public class SmallhandsConfigScreen extends Screen {
             b.setMessage(toggle("Affect Arm", cfg.affectArm));
         }).bounds(centerX + 5, y, 150, 20).build());
 
+        y += 24;
+
+        addRenderableWidget(Button.builder(handLabel(cfg.hand), b -> {
+            cfg.hand = cfg.hand.next();
+            b.setMessage(handLabel(cfg.hand));
+        }).bounds(centerX - 155, y, 310, 20).build());
+
         y += 28;
 
         addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, b -> onClose()).bounds(centerX - 155, y, 150, 20).build());
@@ -93,6 +100,10 @@ public class SmallhandsConfigScreen extends Screen {
     public void onClose() {
         SmallhandsConfig.save();
         minecraft.gui.setScreen(parent);
+    }
+
+    private static Component handLabel(SmallhandsConfig.Hand hand) {
+        return Component.literal("Hand: " + hand.label);
     }
 
     private static Component toggle(String label, boolean on) {

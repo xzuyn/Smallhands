@@ -59,6 +59,20 @@ public final class SmallhandsConfig {
         }
     }
 
+    public enum Hand {
+        BOTH("Both"), MAIN("Main Hand"), OFF("Off Hand");
+
+        public final String label;
+
+        Hand(String label) {
+            this.label = label;
+        }
+
+        public Hand next() {
+            return values()[(ordinal() + 1) % values().length];
+        }
+    }
+
     public static final class Data {
         public float scale = 0.60f;
 
@@ -69,6 +83,8 @@ public final class SmallhandsConfig {
         public boolean affectItem = true;
         public boolean affectArm = true;
 
+        public Hand hand = Hand.BOTH;
+
         public Data copy() {
             Data copy = new Data();
             copy.scale = scale;
@@ -77,10 +93,12 @@ public final class SmallhandsConfig {
             copy.zOffset = zOffset;
             copy.affectItem = affectItem;
             copy.affectArm = affectArm;
+            copy.hand = hand;
             return copy;
         }
 
         void clamp() {
+            if (hand == null) hand = Hand.BOTH;
             scale = clamp(scale, 0.05f, 1.50f);
             xOffset = clamp(xOffset, -2.0f, 2.0f);
             yOffset = clamp(yOffset, -2.0f, 2.0f);

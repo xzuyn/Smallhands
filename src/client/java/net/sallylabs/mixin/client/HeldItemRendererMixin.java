@@ -2,7 +2,10 @@ package net.sallylabs.mixin.client;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemInHandRenderer;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.sallylabs.SmallhandsConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -22,10 +25,20 @@ public class HeldItemRendererMixin {
         }
     }
 
+    @Unique
+    private static boolean smallhands$handEnabled(HumanoidArm side) {
+        SmallhandsConfig.Hand hand = SmallhandsConfig.get().hand;
+        if (hand == SmallhandsConfig.Hand.BOTH) return true;
+        boolean isMain = side == Minecraft.getInstance().options.mainHand().get();
+        return isMain == (hand == SmallhandsConfig.Hand.MAIN);
+    }
+
     @Inject(method = "renderItem", at = @At("HEAD"))
-    private void smallhands$preRenderItem(CallbackInfo ci, @Local(argsOnly = true) PoseStack poseStack) {
+    private void smallhands$preRenderItem(CallbackInfo ci, @Local(argsOnly = true) PoseStack poseStack,
+                                          @Local(argsOnly = true) ItemDisplayContext context) {
         poseStack.pushPose();
-        if (SmallhandsConfig.get().affectItem) smallhands$apply(poseStack);
+        HumanoidArm side = context == ItemDisplayContext.FIRST_PERSON_LEFT_HAND ? HumanoidArm.LEFT : HumanoidArm.RIGHT;
+        if (SmallhandsConfig.get().affectItem && smallhands$handEnabled(side)) smallhands$apply(poseStack);
     }
 
     @Inject(method = "renderItem", at = @At("RETURN"))
@@ -45,7 +58,8 @@ public class HeldItemRendererMixin {
                     shift = At.Shift.AFTER
             )
     )
-    private void smallhands$transformArm(CallbackInfo ci, @Local(argsOnly = true) PoseStack poseStack) {
-        if (SmallhandsConfig.get().affectArm) smallhands$apply(poseStack);
+    private void smallhands$transformArm(CallbackInfo ci, @Local(argsOnly = true) PoseStack poseStack,
+                                         @Local(argsOnly = true) HumanoidArm arm) {
+        if (SmallhandsConfig.get().affectArm && smallhands$handEnabled(arm)) smallhands$apply(poseStack);
     }
 }
